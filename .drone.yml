@@ -1,0 +1,96 @@
+---
+kind: pipeline
+name: default
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: buildkit
+  detach: true
+  image: moby/buildkit:v0.6.0
+  privileged: true
+  commands:
+    - buildkitd --addr unix:///var/run/buildkit/buildkitd.sock --allow-insecure-entitlement security.insecure
+  volumes:
+  - name: dockersock
+    path: /var/run
+  when:
+    event:
+      - ""
+
+- name: build
+  pull: always
+  image: autonomy/build-container:latest
+  commands:
+  - make protoc-gen-proxy
+  environment:
+    BINDIR: /usr/local/bin
+    BUILDKIT_HOST: ${BUILDKIT_HOST=tcp://buildkitd.ci.svc:1234}
+  volumes:
+  - name: dockersock
+    path: /var/run
+  - name: dev
+    path: /dev
+  - name: tmp
+    path: /tmp
+  depends_on:
+  - buildkit
+
+- name: push
+  pull: always
+  image: autonomy/build-container:latest
+  commands:
+  - make gitmeta
+  - make login
+  - make push
+  environment:
+    DOCKER_PASSWORD:
+      from_secret: docker_password
+    DOCKER_USERNAME:
+      from_secret: docker_username
+  volumes:
+  - name: dockersock
+    path: /var/run
+  - name: dev
+    path: /dev
+  - name: tmp
+    path: /tmp
+  when:
+    event:
+      exclude:
+      - pull_request
+  depends_on:
+  - build
+
+services:
+- name: docker
+  image: docker:19.03-dind
+  entrypoint:
+  - dockerd
+  command:
+  - --dns=8.8.8.8
+  - --dns=8.8.4.4
+  - --mtu=1440
+  - --log-level=error
+  privileged: true
+  volumes:
+  - name: dockersock
+    path: /var/run
+  - name: dev
+    path: /dev
+  - name: tmp
+    path: /tmp
+
+volumes:
+- name: dockersock
+  temp: {}
+- name: dev
+  host:
+    path: /dev
+- name: tmp
+  temp: {}
+
+node:
+  node-role.kubernetes.io/ci: ""
