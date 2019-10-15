@@ -101,7 +101,7 @@ protoc-gen-proxy: buildkitd
 push: gitmeta login
 	@docker push autonomy/protoc-gen-proxy:$(TAG)
 ifeq ($(BRANCH),master)
-	@docker tag autonomy/installer:$(TAG) autonomy/protoc-gen-proxy:latest
+	@docker tag autonomy/protoc-gen-proxy:$(TAG) autonomy/protoc-gen-proxy:latest
 	@docker push autonomy/protoc-gen-proxy:latest
 endif
 
