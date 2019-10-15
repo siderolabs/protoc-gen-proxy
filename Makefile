@@ -113,3 +113,7 @@ unit-tests: buildkitd
 		--output type=local,dest=./ \
 		--opt build-arg:TESTPKGS=$(TESTPKGS) \
 		$(COMMON_ARGS)
+
+.PHONY: login
+login:
+	@docker login --username "$(DOCKER_USERNAME)" --password "$(DOCKER_PASSWORD)"
