@@ -166,3 +166,13 @@ func (g *proxy) generateStreamCopyHelper() {
 	g.gen.P("}")
 	g.gen.P("")
 }
+
+func (g *proxy) generateNoProxyDialer() {
+	g.gen.P("func noProxyDialer(ctx context.Context, addr string) (net.Conn, error) {")
+	g.gen.P("dst, err := net.ResolveUnixAddr(\"unix\", addr)")
+	g.gen.P("if err != nil {")
+	g.gen.P("  return nil, err")
+	g.gen.P("}")
+	g.gen.P("return net.DialUnix(\"unix\", nil, dst)")
+	g.gen.P("}")
+}

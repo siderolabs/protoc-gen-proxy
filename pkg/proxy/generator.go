@@ -258,6 +258,8 @@ func (g *proxy) generate(file *generator.FileDescriptor) {
 
 	g.generateStreamCopyHelper()
 
+	g.generateNoProxyDialer()
+
 	g.gen.P(g.ProxyFns.String())
 	g.gen.P("")
 

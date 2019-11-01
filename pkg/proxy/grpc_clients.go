@@ -24,6 +24,7 @@ func (g *proxy) generateLocalClient(serviceName, pkgName string) {
 	g.P(g.GrpcClient, "func NewLocal"+serviceName+"Client() ("+pkgName+"."+serviceName+"Client, error) {")
 	g.P(g.GrpcClient, "conn, err := grpc.Dial(\"unix:\"+constants."+serviceName+"SocketPath,")
 	g.P(g.GrpcClient, "grpc.WithInsecure(),")
+	g.P(g.GrpcClient, "grpc.WithContextDialer(noProxyDialer),")
 	g.P(g.GrpcClient, ")")
 	g.P(g.GrpcClient, "if err != nil {")
 	g.P(g.GrpcClient, "return nil, err")
