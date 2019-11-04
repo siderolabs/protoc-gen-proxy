@@ -241,6 +241,8 @@ func (g *proxy) Generate(file *generator.FileDescriptor) {
 
 func (g *proxy) generate(file *generator.FileDescriptor) {
 	g.gen.AddImport("io")
+	g.gen.AddImport("net")
+	g.gen.AddImport("net/url")
 	g.gen.AddImport("sync")
 	g.gen.AddImport("google.golang.org/grpc/metadata")
 	g.gen.AddImport("google.golang.org/grpc/credentials")
