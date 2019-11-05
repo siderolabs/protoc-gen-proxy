@@ -241,6 +241,7 @@ func (g *proxy) Generate(file *generator.FileDescriptor) {
 
 func (g *proxy) generate(file *generator.FileDescriptor) {
 	g.gen.AddImport("io")
+	g.gen.AddImport("log")
 	g.gen.AddImport("net")
 	g.gen.AddImport("net/url")
 	g.gen.AddImport("sync")

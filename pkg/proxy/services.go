@@ -130,6 +130,7 @@ func (g *proxy) generateClientFns(serviceName, pkgName string) {
 	g.P(g.Clients, ")")
 	g.P(g.Clients, "if err != nil {")
 	g.P(g.Clients, "// TODO: probably worth wrapping err to add some context about the target")
+	g.P(g.Clients, "log.Printf(\"failed to connect to %s:%d\", target, 50000)")
 	g.P(g.Clients, "errors = go_multierror.Append(errors, err)")
 	g.P(g.Clients, "continue")
 	g.P(g.Clients, "}")
