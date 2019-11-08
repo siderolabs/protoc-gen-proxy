@@ -67,6 +67,7 @@ func init() {
 // plugin architecture.  It generates bindings for gRPC support.
 type proxy struct {
 	ProxySwitch         *bytes.Buffer
+	StreamProxySwitch   *bytes.Buffer
 	ProxyFns            *bytes.Buffer
 	InitClients         *bytes.Buffer
 	Clients             *bytes.Buffer
@@ -98,6 +99,7 @@ var (
 func (g *proxy) Init(gen *generator.Generator) {
 	g.gen = gen
 	g.ProxySwitch = new(bytes.Buffer)
+	g.StreamProxySwitch = new(bytes.Buffer)
 	g.ProxyFns = new(bytes.Buffer)
 	g.InitClients = new(bytes.Buffer)
 	g.Clients = new(bytes.Buffer)
@@ -192,7 +194,9 @@ func (g *proxy) Generate(file *generator.FileDescriptor) {
 		serviceName := generator.CamelCase(service.GetName())
 
 		// g.ProxySwitch
-		g.generateSwitchStatement(serviceName, file.GetPackage(), service.Method)
+		g.generateUnarySwitchStatement(serviceName, file.GetPackage(), service.Method)
+		// g.StreamProxySwitch
+		g.generateStreamSwitchStatement(serviceName, file.GetPackage(), service.Method)
 
 		// g.ProxyFns
 		g.generateServiceFuncType(serviceName)
@@ -201,6 +205,7 @@ func (g *proxy) Generate(file *generator.FileDescriptor) {
 
 		for _, method := range service.Method {
 			// No support for streaming stuff yet
+			// TODO when we look at multi stream support
 			if method.GetServerStreaming() || method.GetClientStreaming() {
 				continue
 			}
@@ -252,11 +257,15 @@ func (g *proxy) generate(file *generator.FileDescriptor) {
 
 	g.generateProxyStruct(file.GetPackage())
 
-	g.generateProxyInterceptor(file.GetPackage())
+	g.generateUnaryInterceptor(file.GetPackage())
 
-	g.generateProxyRouter(file.GetPackage())
+	g.generateUnaryProxyRouter(file.GetPackage())
 
 	g.generateStreamCopyHelper()
+
+	g.generateStreamInterceptor(file.GetPackage())
+
+	g.generateStreamProxyRouter(file.GetPackage())
 
 	g.gen.P(g.ProxyFns.String())
 	g.gen.P("")
